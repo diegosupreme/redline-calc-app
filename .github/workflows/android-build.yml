@@ -24,10 +24,9 @@ jobs:
             npm init -y
           fi
 
-       - name: Install Capacitor
+      - name: Install Capacitor
         run: |
           npm install @capacitor/core @capacitor/cli @capacitor/android
-
 
       - name: Verify web directory
         run: |
@@ -36,31 +35,4 @@ jobs:
           echo "WWW:"
           ls -la www
 
-      - name: Initialize Capacitor
-        run: |
-          npx cap init "Redline Calc" "com.redline.calc" --web-dir=www
-
-      - name: Add Android platform
-        run: |
-          npx cap add android
-
-      - name: Sync Capacitor
-        run: |
-          npx cap sync android
-
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 17
-
-      - name: Build APK (Debug)
-        run: |
-          cd android
-          ./gradlew assembleDebug
-
-      - name: Upload APK artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: redline-calc-apk
-          path: android/app/build/outputs/apk/
+      - name:
