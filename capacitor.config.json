@@ -1,0 +1,6 @@
+{
+  "appId": "com.redline.calc",
+  "appName": "Redline Calc",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}
