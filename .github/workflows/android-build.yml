@@ -9,26 +9,36 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
-      - name: Install dependencies
+      - name: Initialize npm project
         run: |
-          npm install
+          if [ ! -f package.json ]; then
+            npm init -y
+          fi
+
+      - name: Install Capacitor
+        run: |
           npm install @capacitor/core @capacitor/cli
 
-      - name: Init Capacitor (safe)
+      - name: Verify web directory
         run: |
-          npx cap init "Redline Calc" "com.redline.calc" --web-dir=www --npm-client=npm || true
+          ls -la
+          ls -la www
 
-      - name: Add Android Platform
+      - name: Initialize Capacitor (forced)
         run: |
-          npx cap add android || true
+          npx cap init "Redline Calc" "com.redline.calc" --web-dir=www --npm-client=npm
+
+      - name: Add Android platform
+        run: |
+          npx cap add android
 
       - name: Sync Capacitor
         run: |
@@ -45,8 +55,4 @@ jobs:
           cd android
           ./gradlew assembleDebug
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: redline-calc-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+      - na
