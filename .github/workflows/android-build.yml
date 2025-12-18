@@ -35,7 +35,7 @@ jobs:
 
       - name: Initialize Capacitor
         run: |
-          npx cap init "Redline Calc" "com.redline.calc" --web-dir=www --npm-client=npm
+          npx cap init "Redline Calc" "com.redline.calc" --web-dir=www
 
       - name: Add Android platform
         run: |
