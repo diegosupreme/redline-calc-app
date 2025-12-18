@@ -9,6 +9,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.parallel=false -Dorg.gradle.configureondemand=false"
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -17,6 +20,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
+
+      - name: Setup Java 11 (stable)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 11
 
       - name: Ensure npm project
         run: |
@@ -27,13 +36,6 @@ jobs:
       - name: Install Capacitor and Android platform
         run: |
           npm install @capacitor/core @capacitor/cli @capacitor/android
-
-      - name: Verify web directory
-        run: |
-          echo "Root directory:"
-          ls -la
-          echo "WWW directory:"
-          ls -la www
 
       - name: Initialize Capacitor
         run: |
@@ -47,13 +49,11 @@ jobs:
         run: |
           npx cap sync android
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 17
+      - name: Force Gradle 7.6 (stable)
+        run: |
+          sed -i 's|distributionUrl=.*|distributionUrl=https\\://services.gradle.org/distributions/gradle-7.6-all.zip|' android/gradle/wrapper/gradle-wrapper.properties
 
-      - name: Prepare Gradle (clean cache)
+      - name: Clean Gradle cache
         run: |
           rm -rf ~/.gradle/caches
           rm -rf ~/.gradle/wrapper
@@ -61,7 +61,7 @@ jobs:
       - name: Build APK (Debug)
         run: |
           cd android
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: Upload APK artifacts
         uses: actions/upload-artifact@v4
