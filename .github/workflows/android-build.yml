@@ -24,15 +24,15 @@ jobs:
             npm init -y
           fi
 
-      - name: Install Capacitor
+      - name: Install Capacitor and Android platform
         run: |
           npm install @capacitor/core @capacitor/cli @capacitor/android
 
       - name: Verify web directory
         run: |
-          echo "Root:"
+          echo "Root directory:"
           ls -la
-          echo "WWW:"
+          echo "WWW directory:"
           ls -la www
 
       - name: Initialize Capacitor
@@ -53,10 +53,15 @@ jobs:
           distribution: temurin
           java-version: 17
 
+      - name: Prepare Gradle (clean cache)
+        run: |
+          rm -rf ~/.gradle/caches
+          rm -rf ~/.gradle/wrapper
+
       - name: Build APK (Debug)
         run: |
           cd android
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --no-daemon
 
       - name: Upload APK artifacts
         uses: actions/upload-artifact@v4
