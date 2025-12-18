@@ -2,7 +2,8 @@ name: Build Android APK
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
   build:
@@ -17,7 +18,7 @@ jobs:
         with:
           node-version: 18
 
-      - name: Initialize npm project
+      - name: Ensure npm project
         run: |
           if [ ! -f package.json ]; then
             npm init -y
@@ -32,27 +33,10 @@ jobs:
           ls -la
           ls -la www
 
-      - name: Initialize Capacitor (forced)
+      - name: Initialize Capacitor
         run: |
           npx cap init "Redline Calc" "com.redline.calc" --web-dir=www --npm-client=npm
 
       - name: Add Android platform
         run: |
-          npx cap add android
-
-      - name: Sync Capacitor
-        run: |
-          npx cap sync android
-
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 17
-
-      - name: Build APK
-        run: |
-          cd android
-          ./gradlew assembleDebug
-
-      - na
+          npx cap add a
