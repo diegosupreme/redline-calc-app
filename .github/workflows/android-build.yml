@@ -24,9 +24,10 @@ jobs:
             npm init -y
           fi
 
-      - name: Install Capacitor
+            - name: Install Capacitor
         run: |
-          npm install @capacitor/core @capacitor/cli
+          npm install @capacitor/core @capacitor/cli @capacitor/android
+
 
       - name: Verify web directory
         run: |
