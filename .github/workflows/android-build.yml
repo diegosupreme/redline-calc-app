@@ -9,16 +9,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    env:
-      GRADLE_USER_HOME: ${{ github.workspace }}/.gradle
-      GRADLE_OPTS: >
-        -Dorg.gradle.daemon=false
-        -Dorg.gradle.parallel=false
-        -Dorg.gradle.configureondemand=false
-        -Dorg.gradle.caching=false
-        -Dkotlin.incremental=false
-        -Dfile.encoding=UTF-8
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -28,25 +18,24 @@ jobs:
         with:
           node-version: 18
 
-      - name: Setup Java 17 (required by AGP)
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 17
-
       - name: Ensure npm project
         run: |
           if [ ! -f package.json ]; then
             npm init -y
           fi
 
-      - name: Install Capacitor + Android
+      - name: Install Capacitor
         run: |
-          npm install @capacitor/core @capacitor/cli @capacitor/android
+          npm install @capacitor/core @capacitor/cli
+
+      - name: Verify web directory
+        run: |
+          ls -la
+          ls -la www
 
       - name: Initialize Capacitor
         run: |
-          npx cap init "Redline Calc" "com.redline.calc" --web-dir=www
+          npx cap init "Redline Calc" "com.redline.calc" --web-dir=www --npm-client=npm
 
       - name: Add Android platform
         run: |
@@ -56,25 +45,19 @@ jobs:
         run: |
           npx cap sync android
 
-      - name: Force Gradle 8.2.1 (required)
-        run: |
-          sed -i 's|distributionUrl=.*|distributionUrl=https\\://services.gradle.org/distributions/gradle-8.2.1-all.zip|' android/gradle/wrapper/gradle-wrapper.properties
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
 
-      - name: Clean isolated Gradle cache
-        run: |
-          rm -rf .gradle
-          mkdir -p .gradle
-
-      - name: Build APK (Debug)
+      - name: Build APK
         run: |
           cd android
-          ./gradlew assembleDebug \
-            --no-daemon \
-            --no-build-cache \
-            --stacktrace
+          ./gradlew assembleDebug
 
-      - name: Upload APK artifacts
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: redline-calc-apk
-          path: android/app/build/outputs/apk/
+          path: android/app/build/outputs/apk/debug/app-debug.apk
