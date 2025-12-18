@@ -10,7 +10,14 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.parallel=false -Dorg.gradle.configureondemand=false"
+      GRADLE_USER_HOME: ${{ github.workspace }}/.gradle
+      GRADLE_OPTS: >
+        -Dorg.gradle.daemon=false
+        -Dorg.gradle.parallel=false
+        -Dorg.gradle.configureondemand=false
+        -Dorg.gradle.caching=false
+        -Dkotlin.incremental=false
+        -Dfile.encoding=UTF-8
 
     steps:
       - name: Checkout repository
@@ -21,11 +28,11 @@ jobs:
         with:
           node-version: 18
 
-      - name: Setup Java 11 (stable)
+      - name: Setup Java 17 (required by AGP)
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 11
+          java-version: 17
 
       - name: Ensure npm project
         run: |
@@ -33,7 +40,7 @@ jobs:
             npm init -y
           fi
 
-      - name: Install Capacitor and Android platform
+      - name: Install Capacitor + Android
         run: |
           npm install @capacitor/core @capacitor/cli @capacitor/android
 
@@ -49,19 +56,22 @@ jobs:
         run: |
           npx cap sync android
 
-      - name: Force Gradle 7.6 (stable)
+      - name: Force Gradle 8.2.1 (required)
         run: |
-          sed -i 's|distributionUrl=.*|distributionUrl=https\\://services.gradle.org/distributions/gradle-7.6-all.zip|' android/gradle/wrapper/gradle-wrapper.properties
+          sed -i 's|distributionUrl=.*|distributionUrl=https\\://services.gradle.org/distributions/gradle-8.2.1-all.zip|' android/gradle/wrapper/gradle-wrapper.properties
 
-      - name: Clean Gradle cache
+      - name: Clean isolated Gradle cache
         run: |
-          rm -rf ~/.gradle/caches
-          rm -rf ~/.gradle/wrapper
+          rm -rf .gradle
+          mkdir -p .gradle
 
       - name: Build APK (Debug)
         run: |
           cd android
-          ./gradlew assembleDebug --no-daemon --stacktrace
+          ./gradlew assembleDebug \
+            --no-daemon \
+            --no-build-cache \
+            --stacktrace
 
       - name: Upload APK artifacts
         uses: actions/upload-artifact@v4
